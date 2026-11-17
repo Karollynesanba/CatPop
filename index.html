@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CatPop</title>
+<style>
+@property --cor{syntax:'<color>';inherits:true;initial-value:#7ee2a8}
+:root{
+color-scheme:light dark;
+--bg:#faf7ff;--card:#fff;--txt:#2a2238;--sub:#655b75;--edge:#e8e0f0;
+--scene:#eee6fb;--halo:#f9f3ff;--track:#eee8f5;--grid:#9383a1;
+--cor:#7ee2a8;--ink:#28543f;--shadow:#35234d0d;
+}
+@media(prefers-color-scheme:dark){
+:root{--bg:#1b1726;--card:#262036;--txt:#f3eefc;--sub:#c2b6d2;--edge:#403550;
+--scene:#332844;--halo:#41334f;--track:#392f4b;--grid:#ac9cbe;--shadow:#100a1c44;--ink:#7ee2a8}
+}
+*{box-sizing:border-box}
+html{transition:--cor .55s}
+body{margin:0;background:var(--bg);color:var(--txt);font:1rem/1.45 system-ui,sans-serif}
+main{width:min(100%,508px);margin:auto;padding:24px 16px 20px;display:grid;gap:12px}
+header,.row,.brand,.status{display:flex;align-items:center}
+header,.row{justify-content:space-between;gap:12px}
+header{padding:0 2px 5px}
+.brand{gap:9px}
+.logo{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:var(--scene);color:var(--txt)}
+.logo svg{width:23px}
+h1,h2,p,dl,dd{margin:0}
+h1{font-size:1.5rem;letter-spacing:-.065em;line-height:1}
+h2{font-size:.94rem;letter-spacing:-.02em}
+.status{gap:6px;font-size:.71rem;font-weight:700;color:var(--sub);background:var(--card);border:1px solid var(--edge);padding:5px 9px;border-radius:30px}
+.status::before{content:"";width:7px;height:7px;flex:none;border-radius:50%;background:currentColor}
+.status.on::before{background:#51b882}
+.status.off::before{background:#e17183}
+.status.demo::before{background:#e6a048}
+.card{min-width:0;background:var(--card);border:1px solid var(--edge);border-radius:21px;padding:16px;box-shadow:0 4px 16px var(--shadow)}
+.gato{padding:8px;text-align:center;border-radius:25px}
+.cena{border-radius:18px;overflow:hidden;background:var(--scene);background:linear-gradient(145deg,color-mix(in srgb,var(--scene),var(--cor) 16%),var(--scene) 59%)}
+.cena svg{display:block;width:min(100%,340px);margin:auto}
+.legenda{padding:12px 8px 11px}
+.rotulo{color:var(--sub);font-size:.7rem;font-weight:750;letter-spacing:.11em;text-transform:uppercase}
+.estado{color:var(--ink);color:light-dark(var(--ink),var(--cor));font-size:clamp(1.8rem,8vw,2.45rem);line-height:1.08;letter-spacing:-.055em;margin:3px 0 6px;transition:color .55s}
+.msg{color:var(--sub);font-size:.84rem;min-height:1.25em}
+.coluna,.cauda,.folhas,.cabeca,.pisca{transform-box:fill-box}
+.coluna,.cabeca,.folhas{transform-origin:center bottom;transition:transform .6s}
+.cauda{transform-origin:left bottom}
+
+.halo{fill:var(--halo)}
+.brilho{fill:var(--cor);transition:fill .55s}
+.gotas{opacity:0;transition:opacity .4s;fill:var(--cor)}
+.encharcado .gotas{opacity:1}
+.encharcado .gotas path{animation:pingar 1.7s ease-in infinite}
+.encharcado .gotas path:nth-child(2){animation-delay:-.9s}
+.encharcado .gotas path:nth-child(3){animation-delay:-.4s}
+.encharcado .cabeca{transform:translateY(-4px);animation:susto .42s ease-out}
+.sede .cabeca{transform:translateY(6px) rotate(-7deg)}
+.sede .folhas{transform:rotate(16deg) scaleY(.66)}
+.sede .coluna{animation:respirar 5s ease-in-out infinite}
+.feliz .coluna{animation:balancar 4.8s ease-in-out infinite}
+.feliz .cauda{animation:balancar 3.3s ease-in-out infinite reverse}
+.feliz .pisca{transform-origin:center;animation:piscar 5s infinite}
+@keyframes balancar{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg)}}
+@keyframes piscar{0%,42%,48%,100%{transform:scaleY(1)}45%{transform:scaleY(.15)}}
+@keyframes respirar{50%{transform:scaleY(.96) translateY(2px)}}
+@keyframes pingar{0%{transform:translateY(-9px);opacity:0}25%{opacity:1}90%,100%{transform:translateY(19px);opacity:0}}
+@keyframes susto{50%{transform:translateY(-10px) rotate(4deg)}}
+.val{font-size:1.75rem;font-weight:800;line-height:1;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
+.barra{margin:13px 0 9px;height:13px;position:relative;border-radius:30px;background:var(--track)}
+#barra{width:0;height:100%;border-radius:inherit;background:var(--cor);background:linear-gradient(90deg,color-mix(in srgb,var(--cor),var(--card) 25%),var(--cor));transition:width .45s}
+.faixa{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--sub);border-radius:2px;opacity:.75;transform:translateX(-50%)}
+.faixas{display:grid;grid-template-columns:30fr 40fr 30fr;gap:2px;font-size:.68rem;color:var(--sub);text-align:center}
+
+.faixas span:first-child{text-align:left}.faixas span:last-child{text-align:right}
+.faixas i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--faixa);vertical-align:.1em;margin-right:3px}
+.faixas small{display:block;font-size:inherit}
+.periodo,.eixo,.info dt{color:var(--sub);font-size:.72rem}
+.periodo{white-space:nowrap}
+canvas{display:block;width:100%;height:112px;margin-top:8px}
+.eixo{display:flex;justify-content:space-between;padding-right:29px}
+.info dl{display:grid;grid-template-columns:1fr 1fr;gap:9px 12px;margin-top:10px}
+.info dl div{padding:8px 10px;background:var(--bg);border-radius:10px;min-width:0}
+.info dd{font-size:.86rem;font-weight:700;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app">
+<header>
+<div class="brand">
+<span class="logo" aria-hidden="true"><svg viewBox="0 0 32 32" fill="currentColor">
+<path d="M7 15 8 6q0-2 2-1l5 5h3l5-5q2-1 2 1l1 9q2 10-10 10T7 15Z"/>
+<path d="M12 16h.1m8 0h.1m-6 4q2 2 4 0" fill="none" stroke="var(--scene)" stroke-width="1.8" stroke-linecap="round"/>
+</svg></span>
+<h1>CatPop</h1>
+</div>
+<span id="status" class="status">conectando…</span>
+</header>
+
+<section class="card gato" aria-labelledby="estado">
+<div class="cena">
+<svg viewBox="0 0 340 202" role="img" aria-label="Gatinho lilás ao lado de um vaso com planta">
+<ellipse class="halo" cx="167" cy="99" rx="98" ry="78"/>
+<path class="brilho" opacity=".72" d="M64 51q1 8 9 9-8 1-9 9-1-8-9-9 8-1 9-9ZM273 35q1 6 7 7-6 1-7 7-1-6-7-7 6-1 7-7Z"/>
+<ellipse cx="172" cy="178" rx="121" ry="12" fill="#795b9d" opacity=".16"/>
+<g class="coluna" stroke="#523b69" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round">
+<path class="cauda" fill="#aa93d6" d="M169 171c19 5 42-5 40-25-1-14-17-18-19-7-1 5 5 5 5 10 0 8-14 10-25 8Z"/>
+<path fill="#b6a3e1" d="M108 173c-10-21 4-50 33-52 26-2 46 23 39 47-5 15-58 15-72 5Z"/>
+<ellipse cx="140" cy="160" rx="20" ry="16" fill="#d9cef4" stroke="none"/>
+<path fill="#cbbdf0" d="M104 172q0-12 12-12 13 0 14 12 0 7-13 7t-13-7Zm42 0q1-12 13-12 12 0 13 12 0 7-13 7t-13-7Z"/>
+<path d="M114 171v3m7-3v3m35-3v3m7-3v3" stroke="#8266a7" stroke-width="1.5"/>
+<g class="cabeca">
+<path fill="#cbbdf0" d="M87 88q-7-22-4-43 1-7 8-4 17 7 31 21 15-4 31 0 13-14 31-21 7-3 8 4 4 22-4 43 7 10 7 22 0 36-57 36t-57-36q0-12 6-22Z"/>
+<path fill="#efa8c5" stroke="none" d="M94 53q12 6 19 13-11 5-17 13-4-16-2-26Zm88 0q-12 6-19 13 11 5 17 13 4-16 2-26Z"/>
+<path d="M132 65l2 10m6-11v12m7-11-2 10" stroke="#a48ccb" fill="none"/>
+<ellipse cx="103" cy="114" rx="10" ry="5" fill="#efa8c5" stroke="none"/>
+<ellipse cx="173" cy="114" rx="10" ry="5" fill="#efa8c5" stroke="none"/>
+<path d="M98 112l-15-3m14 9-13 3m94-9 15-3m-14 9 13 3" fill="none" stroke="#80639e" stroke-width="1.7"/>
+<g id="olhos" class="pisca"></g>
+<path d="M134 111q4-2 8 0l-4 5Z" fill="#b75780" stroke="none"/>
+<path id="boca" fill="none" stroke-width="2.2"/>
+</g>
+</g>
+<g class="folhas" stroke="#426d56" stroke-width="2.2" stroke-linejoin="round">
+<path d="M238 135q-3-24 4-55m-4 47q-9-19-20-22m20 20q12-18 21-21" fill="none" stroke-linecap="round"/>
+<path d="M241 100q-10-18 6-33 11 22-6 33Z" fill="#7ee2a8"/>
+<path d="M233 120q-21 0-25-23 21 0 25 23Z" fill="#9bdf9c"/>
+<path d="M242 120q3-22 27-23-5 20-27 23Z" fill="#65c893"/>
+</g>
+<g stroke="#703f57" stroke-width="2.4" stroke-linejoin="round">
+<path d="M212 141h54l-5 28q-2 9-10 9h-24q-8 0-10-9Z" fill="#e9a1b6"/>
+<rect x="208" y="133" width="62" height="12" rx="5" fill="#f6bccb"/>
+<path d="M239 158c-6-7-14 1 0 9 14-8 6-16 0-9Z" fill="#fff0ee" stroke="none"/>
+</g>
+<g class="gotas">
+<path d="M77 56q13 15 0 18-13-3 0-18Z"/>
+<path d="M201 53q11 13 0 16-11-3 0-16Z"/>
+<path d="M289 64q11 13 0 16-11-3 0-16Z"/>
+</g>
+</svg>
+</div>
+<div class="legenda">
+<p class="rotulo">Humor do gato</p>
+<h2 id="estado" class="estado">—</h2>
+<p id="msg" class="msg"></p>
+</div>
+</section>
+
+<section class="card">
+<div class="row"><h2 id="solo">Umidade do solo</h2><span id="umidade" class="val">—</span></div>
+<div class="barra" role="meter" aria-labelledby="solo" aria-valuemin="0" aria-valuemax="100">
+<div id="barra"></div><span class="faixa" id="f1"></span><span class="faixa" id="f2"></span>
+</div>
+<div class="faixas">
+<span><i></i>Sede<small>&lt; 30%</small></span>
+<span><i></i>Feliz<small>30–70%</small></span>
+<span><i></i>Encharcado<small>&gt; 70%</small></span>
+</div>
+</section>
+
+<section class="card">
+<div class="row"><h2>Histórico de umidade</h2><span class="periodo">Últimos 60 s</span></div>
+<canvas id="grafico" role="img" aria-label="Umidade dos últimos 60 s. Referências em 30% e 70%."></canvas>
+<div class="eixo" aria-hidden="true"><span>60 s atrás</span><span>Agora</span></div>
+</section>
+
+<section class="card info">
+<h2>Detalhes técnicos</h2>
+<dl>
+<div><dt>Leitura bruta (ADC)</dt><dd id="leitura">—</dd></div>
+<div><dt>Ligado há</dt><dd id="uptime">—</dd></div>
+<div><dt>Nuvem (ThingSpeak)</dt><dd id="nuvem">—</dd></div>
+<div><dt>Última atualização</dt><dd id="hora">—</dd></div>
+</dl>
+</section>
+</main>
+
+<script>
+const URL_DADOS = "/dados";
+const INTERVALO = 1000;
+const LIMITE_SEDE = 30;
+const LIMITE_ENCHARCADO = 70;
+const ESTADOS = {
+sede: {titulo:"Com sede",cor:"#ff9a5c",ink:"#8e3d15",olhos:"tristes",boca:"M131 126q7 -8 14 0",msg:"Preciso de água! Encha o reservatório."},
+feliz: {titulo:"Feliz",cor:"#7ee2a8",ink:"#28543f",olhos:"felizes",boca:"M130 119q4 5 8 0 4 5 8 0",msg:"Solo no ponto certo."},
+encharcado: {titulo:"Encharcado",cor:"#6fa8ff",ink:"#285295",olhos:"grandes",boca:"M133 125a5 6 0 1 0 10 0 5 6 0 1 0-10 0Z",msg:"Água demais! Espere secar."}
+};
+function estadoPorUmidade(u){
+return u < LIMITE_SEDE ? "sede" : u > LIMITE_ENCHARCADO ? "encharcado" : "feliz";
+}
+
+const $ = id => document.getElementById(id);
+const raiz = document.documentElement;
+const hist = [];
+const medidor = $("barra").parentElement;
+let falhas = 0, demo = false;
+$("f1").style.left = LIMITE_SEDE + "%";
+$("f2").style.left = LIMITE_ENCHARCADO + "%";
+Object.values(ESTADOS).forEach((e,i) => {
+document.querySelectorAll(".faixas i")[i].style.setProperty("--faixa",e.cor);
+});
+
+function desenharOlhos(tipo){
+const olho = x => ({
+tristes: `<path d="M${x-7} 99q7 3 14-3" fill="none"/><circle cx="${x}" cy="104" r="3.5" fill="#523b69" stroke="none"/>`,
+felizes: `<ellipse cx="${x}" cy="100" rx="5.2" ry="7" fill="#523b69" stroke="none"/><circle cx="${x+1.5}" cy="98" r="1.6" fill="#fff" stroke="none"/>`,
+grandes: `<circle cx="${x}" cy="99" r="10" fill="#fff8ff"/><circle cx="${x}" cy="100" r="4" fill="#523b69" stroke="none"/>`
+})[tipo];
+$("olhos").innerHTML = olho(116) + olho(160);
+}
+
+function tempo(s){
+s = Number(s) || 0;
+const h = Math.floor(s/3600), m = Math.floor(s%3600/60), ss = s%60;
+return h ? `${h}h ${m}min` : m ? `${m}min ${ss}s` : `${ss}s`;
+}
+
+function render(d){
+const u = Math.max(0, Math.min(100, Math.round(Number(d.umidade) || 0)));
+const nome = (d.estado || estadoPorUmidade(u)).toLowerCase();
+const e = ESTADOS[nome] || ESTADOS.feliz;
+
+if ($("app").className !== nome){
+raiz.style.setProperty("--cor",e.cor);
+raiz.style.setProperty("--ink",e.ink);
+$("app").className = nome;
+$("estado").textContent = e.titulo;
+desenharOlhos(e.olhos);
+$("boca").setAttribute("d",e.boca);
+}
+$("msg").textContent = d.mensagem || e.msg;
+$("umidade").textContent = u + "%";
+$("barra").style.width = u + "%";
+medidor.setAttribute("aria-valuenow",u);
+$("leitura").textContent = d.leitura ?? "—";
+$("uptime").textContent = tempo(d.uptime);
+$("nuvem").textContent = d.nuvem || "—";
+$("hora").textContent = new Date().toLocaleTimeString("pt-BR");
+
+hist.push(u);
+if (hist.length > 60) hist.shift();
+grafico();
+}
+
+function grafico(){
+const c = $("grafico"), ctx = c.getContext("2d"), r = devicePixelRatio || 1;
+const w = c.clientWidth, h = c.clientHeight, fim = w-29, base = h-7;
+c.width = Math.round(w*r);
+c.height = Math.round(h*r);
+ctx.scale(r,r);
+const y = v => base-v/100*(base-7);
+const x = i => 2+(60-hist.length+i)/59*(fim-4);
+const css = getComputedStyle(raiz);
+const cor = ESTADOS[$("app").className]?.cor || ESTADOS.feliz.cor;
+const linha = () => {
+ctx.beginPath();
+hist.forEach((v,i) => i ? ctx.lineTo(x(i),y(v)) : ctx.moveTo(x(i),y(v)));
+};
+if (hist.length > 1){
+const grad = ctx.createLinearGradient(0,7,0,base);
+grad.addColorStop(0,cor+"85");
+grad.addColorStop(1,cor+"0c");
+linha();
+ctx.lineTo(x(hist.length-1),base);
+ctx.lineTo(x(0),base);
+ctx.closePath();
+ctx.fillStyle = grad;
+ctx.fill();
+}
+ctx.strokeStyle = css.getPropertyValue("--grid").trim();
+ctx.fillStyle = css.getPropertyValue("--sub").trim();
+ctx.font = "10px system-ui";
+ctx.textBaseline = "middle";
+[0,LIMITE_SEDE,LIMITE_ENCHARCADO,100].forEach(v => {
+ctx.setLineDash(v === 0 || v === 100 ? [] : [4,4]);
+ctx.globalAlpha = .56;
+ctx.beginPath();
+ctx.moveTo(0,y(v));
+ctx.lineTo(fim,y(v));
+ctx.stroke();
+ctx.globalAlpha = 1;
+ctx.fillText(v+"%",fim+4,y(v));
+});
+ctx.setLineDash([]);
+ctx.lineWidth = 2;
+ctx.lineJoin = "round";
+ctx.strokeStyle = window.matchMedia("(prefers-color-scheme: dark)").matches ? cor : css.getPropertyValue("--ink").trim();
+if (hist.length > 1){ linha(); ctx.stroke(); }
+if (hist.length){
+ctx.fillStyle = ctx.strokeStyle;
+ctx.beginPath();
+ctx.arc(x(hist.length-1),y(hist[hist.length-1]),2.8,0,2*Math.PI);
+ctx.fill();
+}
+}
+window.addEventListener("resize",grafico);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",grafico);
+
+function setStatus(cls, txt){ const s=$("status"); s.className="status "+cls; s.textContent=txt; }
+
+let fase = 0, upDemo = 0;
+function dadoFake(){
+fase += .07; upDemo++;
+const u = Math.round(Math.max(0, Math.min(100, 50 + Math.sin(fase)*45 + (Math.random()-.5)*4)));
+return {umidade:u, leitura:Math.round(3000 - u*18), estado:estadoPorUmidade(u), uptime:upDemo, nuvem:"demo"};
+}
+
+async function atualizar(){
+if (demo){ render(dadoFake()); return; }
+try{
+const r = await fetch(URL_DADOS, {cache:"no-store"});
+if (!r.ok) throw new Error(r.status);
+render(await r.json());
+falhas = 0; setStatus("on","online");
+}catch(err){
+falhas++;
+setStatus("off","sem conexão");
+if (location.protocol === "file:" && falhas >= 2){ demo = true; setStatus("demo","demo"); }
+}
+}
+
+if (new URLSearchParams(location.search).has("demo")) { demo = true; setStatus("demo","demo"); }
+desenharOlhos("felizes");
+grafico();
+atualizar(); setInterval(atualizar, INTERVALO);
+</script>
+</body>
+</html>
